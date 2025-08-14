@@ -4,12 +4,19 @@ import string
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
+import os
 
+# Download required NLTK data if not present
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+if not os.path.exists(nltk_data_path):
+    os.mkdir(nltk_data_path)
 
+nltk.data.path.append(nltk_data_path)
+nltk.download('punkt', download_dir=nltk_data_path)
+nltk.download('stopwords', download_dir=nltk_data_path)
 
 ps = PorterStemmer()
 
-# Re-define the transforming function here directly
 def transforming(message):
     message = message.lower()
     message = nltk.word_tokenize(message)
