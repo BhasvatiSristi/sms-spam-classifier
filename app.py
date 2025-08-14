@@ -4,26 +4,23 @@ import string
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
-import os
 
-# Download required NLTK data if not present
-nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
-if not os.path.exists(nltk_data_path):
-    os.mkdir(nltk_data_path)
-
-nltk.data.path.append(nltk_data_path)
-nltk.download('punkt', download_dir=nltk_data_path)
-nltk.download('stopwords', download_dir=nltk_data_path)
+# Ensure all required NLTK data is available
+nltk.download('punkt')
+nltk.download('punkt_tab')  # NEW: required for NLTK 3.9+
+nltk.download('stopwords')
 
 ps = PorterStemmer()
 
 def transforming(message):
+    # Lowercase
     message = message.lower()
+    # Tokenize
     message = nltk.word_tokenize(message)
 
     y = []
     for i in message:
-        if i.isalnum():
+        if i.isalnum():  # Keep only alphanumeric
             y.append(i)
 
     text = y[:]
@@ -36,6 +33,7 @@ def transforming(message):
     text = y[:]
     y.clear()
 
+    # Stemming
     for i in text:
         y.append(ps.stem(i))
 
@@ -45,21 +43,25 @@ def transforming(message):
 tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
 
-st.title("SMS Spam Classifier")
+# Streamlit UI
+st.title("SMS Spam Classifier 📩")
 
-mesg = st.text_area("Enter the message")
+mesg = st.text_area("Enter the message:")
 
 if st.button('Predict'):
-    if mesg:
+    if mesg.strip():
         transformed_mesg = transforming(mesg)
         vector_mesg = tfidf.transform([transformed_mesg])
         pred = model.predict(vector_mesg)[0]
 
         if pred == 1:
-            st.error("Spam Message Detected!")
+            st.error("🚨 Spam Message Detected!")
         else:
-            st.success("This is a Not Spam (Ham) Message.")
+            st.success("✅ This is a Not Spam (Ham) Message.")
+    else:
+        st.warning("Please enter a message before predicting.")
 
+# Footer
 st.markdown("""
     <style>
         .footer {
